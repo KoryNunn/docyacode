@@ -23,13 +23,11 @@
 
 */
 
-var file = process.argv[2],
-    marked = require('marked'),
+var marked = require('marked'),
     fs = require('fs'),
-    clientStyles = fs.readFileSync('./docStyle.css'),
-    clientScript = fs.readFileSync('./clientscript.js'),
+    clientStyles = fs.readFileSync(__dirname + '/docStyle.css'),
+    clientScript = fs.readFileSync(__dirname + '/clientscript.js'),
     commentRegex = /\/\*\*[\s\S]*?\*\//gm;
-
 
 marked.setOptions({
     gfm: true,
@@ -42,15 +40,13 @@ marked.setOptions({
     langPrefix: 'lang-'
 });
 
-fs.readFile(file, function(error, file){
-    var file = file.toString(),
-        comments = file.match(commentRegex),
+module.exports = function(file, returnAsMarkdown){
+    var comments = file.match(commentRegex),
         result = '';
 
-    result += '<style>' + clientStyles + '</style>';
-
-    result += '<script>' + clientScript + '</script>';
-
+    if(!comments){
+        return '<h1>This file has no docyacode comments</h1>';
+    }
 
     comments.forEach(function(comment){
         var indentation = 100,
@@ -75,11 +71,14 @@ fs.readFile(file, function(error, file){
             markdownLines.push(line.slice(indentation));
         });
 
-
-        result += marked(markdownLines.join('\n'));
+        result += markdownLines.join('\n');
     });
 
-    console.log(result);
+    if(!returnAsMarkdown){
+        result = marked(result);
+        result = '<style>' + clientStyles + '</style>' + result;
+        result = '<script>' + clientScript + '</script>' + result;
+    }
 
-});
-
+    return result;
+}
