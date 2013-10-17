@@ -1,0 +1,14 @@
+{
+  "name": "docyacode",
+  "version": "0.0.0",
+  "description": "",
+  "main": "docyacode.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "BSD",
+  "dependencies": {
+    "marked": "0.2.x"
+  }
+}
