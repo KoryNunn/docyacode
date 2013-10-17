@@ -1,9 +1,3 @@
-var file = process.argv[2],
-    marked = require('marked'),
-    fs = require('fs'),
-    commentRegex = /\/\*\*[\s\S]*?\*\//gm;
-
-
 /**
     # docyacode #
 
@@ -29,6 +23,14 @@ var file = process.argv[2],
 
 */
 
+var file = process.argv[2],
+    marked = require('marked'),
+    fs = require('fs'),
+    clientStyles = fs.readFileSync('./docStyle.css'),
+    clientScript = fs.readFileSync('./clientscript.js'),
+    commentRegex = /\/\*\*[\s\S]*?\*\//gm;
+
+
 marked.setOptions({
     gfm: true,
     tables: true,
@@ -43,7 +45,11 @@ marked.setOptions({
 fs.readFile(file, function(error, file){
     var file = file.toString(),
         comments = file.match(commentRegex),
-        result = '<link rel="stylesheet" href="docStyle.css">';
+        result = '';
+
+    result += '<style>' + clientStyles + '</style>';
+
+    result += '<script>' + clientScript + '</script>';
 
 
     comments.forEach(function(comment){
@@ -71,7 +77,7 @@ fs.readFile(file, function(error, file){
 
 
         result += marked(markdownLines.join('\n'));
-    })
+    });
 
     console.log(result);
 
