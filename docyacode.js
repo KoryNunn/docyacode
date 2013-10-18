@@ -7,19 +7,11 @@
 
         /**
 
-        stuff
-
-        things
-
     end it as usual.
 
     ## Comment syntax ##
 
     docyacode uses [marked](https://github.com/chjj/marked) with [Github flavored markdown](https://help.github.com/articles/github-flavored-markdown)
-
-    ## Usage ##
-
-        node docyacode.js docyacode.js > doc.html
 
 */
 
@@ -40,18 +32,67 @@ marked.setOptions({
     langPrefix: 'lang-'
 });
 
+/**
+    ## docyacode(file, returnAsMarkdown) ##
+
+    Takes a file, scans it for docyacode comments, and returns HTML or markdown.
+
+        docyacode(myFile); // returns html docs.
+*/
+
+function renderMD(doc){
+    var result = '';
+
+    doc.subBlocks.forEach(function(block){
+        result+=block.md;
+        if(block.subBlocks.length){
+            result+=renderMD(block);
+        }
+    });
+
+    return result;
+}
+
+function renderHTML(doc, isSub){
+    var result = '';
+
+    if(!isSub){
+        result += '<style>' + clientStyles + '</style>';
+        result += '<script>' + clientScript + '</script>';
+    }
+
+    doc.subBlocks.forEach(function(block){
+        result+='<div class="docyacode-block">';
+        result+=marked(block.md);
+        if(block.subBlocks.length){
+            result+='<section>';
+            result+=renderHTML(block, true);
+            result+='</section>';
+        }
+        result+='</div>';
+    });
+
+    return result;
+}
+
 module.exports = function(file, returnAsMarkdown){
     var comments = file.match(commentRegex),
-        result = '';
+        doc = {
+            indentation:0,
+            subBlocks:[]
+        };
 
     if(!comments){
         return '<h1>This file has no docyacode comments</h1>';
     }
 
+    var parentBlock = doc;
+
     comments.forEach(function(comment){
         var indentation = 100,
             lines = comment.split(/[\n|\r]/),
             markdownLines = [];
+
 
         lines.slice(1,-1).forEach(function(line){
             if(!line.trim()){
@@ -60,10 +101,8 @@ module.exports = function(file, returnAsMarkdown){
 
             var startWhitespace = line.match(/^\s*/);
 
-            if(startWhitespace){
+            if(startWhitespace.length){
                 indentation = Math.min(startWhitespace.pop().length, indentation);
-            }else{
-                indentation = 0;
             }
         });
 
@@ -71,14 +110,26 @@ module.exports = function(file, returnAsMarkdown){
             markdownLines.push(line.slice(indentation));
         });
 
-        result += markdownLines.join('\n');
+        var block = {
+            md: markdownLines.join('\n'),
+            subBlocks: [],
+            indentation: indentation
+        };
+
+        block.heading = /^\s*?#+(.*?)$/gm.exec(block.md)[1];
+
+        while(parentBlock.indentation >= block.indentation){
+            parentBlock = parentBlock.parent || doc;
+        }
+        parentBlock.subBlocks.push(block);
+        block.parent = parentBlock;
+
+        parentBlock = block;
     });
 
-    if(!returnAsMarkdown){
-        result = marked(result);
-        result = '<style>' + clientStyles + '</style>' + result;
-        result = '<script>' + clientScript + '</script>' + result;
+    if(returnAsMarkdown){
+        return renderMD(doc);
     }
 
-    return result;
+    return renderHTML(doc);
 }
