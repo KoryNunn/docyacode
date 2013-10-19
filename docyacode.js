@@ -62,7 +62,7 @@ function renderHTML(doc, isSub){
     }
 
     doc.subBlocks.forEach(function(block){
-        result+='<div class="docyacode-block">';
+        result+='<div class="docyacode-block" data-blockname="' + block.heading + '">';
         result+=marked(block.md);
         if(block.subBlocks.length){
             result+='<section>';

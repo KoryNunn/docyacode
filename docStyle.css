@@ -2,6 +2,25 @@ body{
     font-family: Arial;
     background: #ddd;
     padding:20px;
+    margin-left: 300px;
+}
+
+.menu{
+    position:fixed;
+    top:0;
+    left:0;
+    bottom:0;
+    overflow-y: scroll;
+    width: 300px;
+    padding:5px;
+    background: white;
+}
+
+.menu a{
+    display: block;
+    padding:5px;
+    color: gray;
+    text-decoration: none;
 }
 
 pre{
