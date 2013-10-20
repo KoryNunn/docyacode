@@ -19,8 +19,39 @@ body{
 .menu a{
     display: block;
     padding:5px;
-    color: gray;
+    color: #333;
     text-decoration: none;
+    overflow: hidden;
+    text-overflow:ellipsis;
+    white-space: nowrap;
+    border-left: solid 1px #999;
+    padding-left: 10px;
+    margin-left: 5px;
+}
+
+.menu div{
+    padding-left:10px;
+    position: relative;
+}
+
+.menu a + div:before{
+    content:"";
+    position: absolute;
+    left: 5px;
+    top: 0;
+    border: solid 5px #999;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+}
+
+.menu a + div:after{
+    content:"";
+    position: absolute;
+    left: 6px;
+    top: 0;
+    border: solid 5px white;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
 }
 
 pre{

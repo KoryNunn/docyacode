@@ -19,7 +19,8 @@ var marked = require('marked'),
     fs = require('fs'),
     clientStyles = fs.readFileSync(__dirname + '/docStyle.css'),
     clientScript = fs.readFileSync(__dirname + '/clientscript.js'),
-    commentRegex = /\/\*\*[\s\S]*?\*\//gm;
+    includeRegex = /\/\/\/\[(.*?)\]/gm,
+    commentRegex = /\/\*\*(?!\*)[\s\S]*?\*\//gm;
 
 marked.setOptions({
     gfm: true,
@@ -53,32 +54,67 @@ function renderMD(doc){
     return result;
 }
 
+function renderMenu(doc, isSub){
+    var result = isSub ? '' : '<div class="menu">';
+
+    doc.subBlocks.forEach(function(block){
+
+        if(!block.heading){
+            return;
+        }
+
+        result += '<a href="#' + block.heading + '">' + block.heading + '</a>';
+
+        if(block.subBlocks.length){
+            result+='<div>';
+            result += renderMenu(block, true);
+            result+='</div>';
+        }
+    });
+
+    if(!isSub){
+        result += '</div>';
+    }
+
+    return result;
+}
+
 function renderHTML(doc, isSub){
     var result = '';
 
     if(!isSub){
         result += '<style>' + clientStyles + '</style>';
         result += '<script>' + clientScript + '</script>';
+
+        result += renderMenu(doc);
     }
 
     doc.subBlocks.forEach(function(block){
-        result+='<div class="docyacode-block" data-blockname="' + block.heading + '">';
-        result+=marked(block.md);
+        result += '<div class="docyacode-block" data-blockname="' + block.heading + '">';
+        block.heading && (result += '<a name="' + block.heading + '"></a>');
+        result += marked(block.md);
+
         if(block.subBlocks.length){
             result+='<section>';
-            result+=renderHTML(block, true);
+            result += renderHTML(block, true);
             result+='</section>';
         }
-        result+='</div>';
+
+        result +='</div>';
     });
 
     return result;
 }
 
 module.exports = function(file, returnAsMarkdown){
+
+    file = file.replace(includeRegex, function(match, item){
+        return '/**\n' + fs.readFileSync(item).toString() + '\n*/';
+    });
+
     var comments = file.match(commentRegex),
         doc = {
-            indentation:0,
+            indentation:-1,
             subBlocks:[]
         };
 
@@ -116,7 +152,9 @@ module.exports = function(file, returnAsMarkdown){
             indentation: indentation
         };
 
-        block.heading = /^\s*?#+(.*?)$/gm.exec(block.md)[1];
+        var heading = /^\s*?#+\s*(.*?)$/gm.exec(block.md);
+
+        block.heading = heading && heading[1];
 
         while(parentBlock.indentation >= block.indentation){
             parentBlock = parentBlock.parent || doc;
