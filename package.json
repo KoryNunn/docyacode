@@ -1,7 +1,6 @@
 {
   "name": "docyacode",
   "version": "0.0.3",
-  "description": "",
   "main": "docyacode.js",
   "bin": {
     "docyacode": "index.js"
@@ -14,5 +13,15 @@
   "dependencies": {
     "marked": "0.2.x",
     "commander": "~2.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KoryNunn/docyacode.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/KoryNunn/docyacode/issues"
+  },
+  "homepage": "https://github.com/KoryNunn/docyacode#readme",
+  "description": ""
 }
