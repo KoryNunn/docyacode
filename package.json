@@ -1,6 +1,6 @@
 {
   "name": "docyacode",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "docyacode.js",
   "bin": {
     "docyacode": "index.js"
